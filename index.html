@@ -894,8 +894,12 @@
       }
     }
 
-    // Background load all
+    // Background load every 5th frame
     function backgroundLoad() {
+      for (let i = 0; i < FRAME_COUNT; i += 5) {
+        if (!frameCache.has(i)) loadFrame(i);
+      }
+      // Then load remaining frames
       for (let i = 0; i < FRAME_COUNT; i++) {
         if (!frameCache.has(i)) loadFrame(i);
       }
@@ -926,8 +930,8 @@
       setTimeout(tryDrawFirstFrame, 100);
       setTimeout(tryDrawFirstFrame, 500);
 
-      // Priority load
-      for (let i = 0; i < 100; i++) loadFrame(i);
+      // Priority load first 50 frames
+      for (let i = 0; i < 50; i++) loadFrame(i);
       setTimeout(backgroundLoad, 100);
 
       // Progress checker
