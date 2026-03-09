@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Schedule Service | Arvin's Detail Shop</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --gold: #C9A962;
+      --gold-light: #E8D5A3;
+      --dark: #0A0A0A;
+      --dark-secondary: #141414;
+      --dark-tertiary: #1E1E1E;
+      --text-light: #F5F5F5;
+      --text-muted: #A0A0A0;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--dark);
+      color: var(--text-light);
+      min-height: 100vh;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 22px 40px;
+      background: rgba(10, 10, 10, 0.9);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .header-brand {
+      font-family: 'Playfair Display', serif;
+      font-size: 24px;
+      font-weight: 700;
+      color: #ffffff;
+      text-decoration: none;
+    }
+
+    .header-brand span {
+      color: var(--gold);
+    }
+
+    .header-phone {
+      font-size: 14px;
+      color: #ffffff;
+      text-decoration: none;
+      font-weight: 500;
+      padding: 10px 20px;
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 2px;
+      transition: all 0.3s ease;
+    }
+
+    .header-phone:hover {
+      background: var(--gold);
+      color: var(--dark);
+      border-color: var(--gold);
+    }
+
+    /* Main Content */
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 80px 40px;
+    }
+
+    .page-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(36px, 6vw, 64px);
+      font-weight: 700;
+      color: var(--text-light);
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .page-subtitle {
+      font-family: 'Jost', sans-serif;
+      font-size: 16px;
+      color: var(--text-muted);
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    /* Service Grid */
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+    }
+
+    .service-card {
+      background: var(--dark-secondary);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 4px;
+      padding: 32px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: block;
+    }
+
+    .service-card:hover {
+      background: var(--dark-tertiary);
+      border-color: var(--gold);
+      transform: translateY(-4px);
+      box-shadow: 0 10px 40px rgba(201, 169, 98, 0.15);
+    }
+
+    .service-icon {
+      font-size: 32px;
+      margin-bottom: 16px;
+    }
+
+    .service-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--text-light);
+      margin-bottom: 8px;
+    }
+
+    .service-description {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+
+    .service-price {
+      font-family: 'Jost', sans-serif;
+      font-size: 14px;
+      color: var(--gold);
+      letter-spacing: 0.1em;
+    }
+
+    /* Info Section */
+    .info-section {
+      margin-top: 64px;
+      padding: 32px;
+      background: var(--dark-secondary);
+      border-radius: 4px;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .info-section h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 24px;
+      color: var(--text-light);
+      margin-bottom: 16px;
+    }
+
+    .info-section p {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.8;
+      margin-bottom: 16px;
+    }
+
+    .info-section a {
+      color: var(--gold);
+      text-decoration: none;
+    }
+
+    .info-section a:hover {
+      text-decoration: underline;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 40px;
+      font-family: 'Jost', sans-serif;
+      font-size: 12px;
+      color: rgba(255,255,255,0.25);
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    /* Mobile */
+    @media (max-width: 768px) {
+      .header {
+        padding: 16px 20px;
+      }
+
+      .header-brand {
+        font-size: 18px;
+      }
+
+      .container {
+        padding: 40px 20px;
+      }
+
+      .services-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <a href="index.html" class="header-brand">Arvin's <span>Detail Shop</span></a>
+    <a href="tel:4057432633" class="header-phone">(405) 743-2633</a>
+  </header>
+
+  <!-- Main Content -->
+  <div class="container">
+    <h1 class="page-title">Schedule Your Detail</h1>
+    <p class="page-subtitle">Select a service below to send us an email. We'll get back to you within 24 hours.</p>
+
+    <div class="services-grid">
+      <!-- Full Detail -->
+      <a href="mailto:arvinsdetailshop@gmail.com?subject=Full%20Detail%20Service%20Request&body=Hi%20Arvin's%20Detail%20Shop,%0D%0A%0D%0AI%27m%20interested%20in%20scheduling%20a%20Full%20Detail%20service%20for%20my%20vehicle.%0D%0A%0D%0AVehicle%20Info:%0D%0A-%20Make/Model:%0D%0A-%20Year:%0D%0A-%20Color:%0D%0A%0D%0APreferred%20Date/Time:%0D%0A%0D%0AAdditional%20Notes:%0D%0A%0D%0AThank%20you!" class="service-card">
+        <div class="service-icon">✨</div>
+        <h2 class="service-name">Full Detail</h2>
+        <p class="service-description">Comprehensive interior and exterior treatment. Includes hand wash, wax, vacuuming, leather conditioning, and window cleaning.</p>
+        <span class="service-price">Starting at $349</span>
+      </a>
+
+      <!-- Interior Detail -->
+      <a href="mailto:arvinsdetailshop@gmail.com?subject=Interior%20Detail%20Service%20Request&body=Hi%20Arvin's%20Detail%20Shop,%0D%0A%0D%0AI%27m%20interested%20in%20scheduling%20an%20Interior%20Detail%20service%20for%20my%20vehicle.%0D%0A%0D%0AVehicle%20Info:%0D%0A-%20Make/Model:%0D%0A-%20Year:%0D%0A-%20Color:%0D%0A%0D%0APreferred%20Date/Time:%0D%0A%0D%0AAdditional%20Notes:%0D%0A%0D%0AThank%20you!" class="service-card">
+        <div class="service-icon">🛋️</div>
+        <h2 class="service-name">Interior Detail</h2>
+        <p class="service-description">Deep clean, condition, and protect every surface inside. Includes vacuuming, steam cleaning, leather conditioning, and odor removal.</p>
+        <span class="service-price">Starting at $249</span>
+      </a>
+
+      <!-- Exterior Detail -->
+      <a href="mailto:arvinsdetailshop@gmail.com?subject=Exterior%20Detail%20Service%20Request&body=Hi%20Arvin's%20Detail%20Shop,%0D%0A%0D%0AI%27m%20interested%20in%20scheduling%20an%20Exterior%20Detail%20service%20for%20my%20vehicle.%0D%0A%0D%0AVehicle%20Info:%0D%0A-%20Make/Model:%0D%0A-%20Year:%0D%0A-%20Color:%0D%0A%0D%0APreferred%20Date/Time:%0D%0A%0D%0AAdditional%20Notes:%0D%0A%0D%0AThank%20you!" class="service-card">
+        <div class="service-icon">🚗</div>
+        <h2 class="service-name">Exterior Detail</h2>
+        <p class="service-description">Hand wash, clay bar treatment, wheel & tire cleaning, and paint protection. Makes your vehicle shine like new.</p>
+        <span class="service-price">Starting at $199</span>
+      </a>
+
+      <!-- Paint Correction -->
+      <a href="mailto:arvinsdetailshop@gmail.com?subject=Paint%20Correction%20Service%20Request&body=Hi%20Arvin's%20Detail%20Shop,%0D%0A%0D%0AI%27m%20interested%20in%20scheduling%20a%20Paint%20Correction%20service%20for%20my%20vehicle.%0D%0A%0D%0AVehicle%20Info:%0D%0A-%20Make/Model:%0D%0A-%20Year:%0D%0A-%20Color:%0D%0A%0D%0ACurrent%20Paint%20Condition:%0D%0A%0D%0APreferred%20Date/Time:%0D%0A%0D%0AAdditional%20Notes:%0D%0A%0D%0AThank%20you!" class="service-card">
+        <div class="service-icon">🎨</div>
+        <h2 class="service-name">Paint Correction</h2>
+        <p class="service-description">Multi-stage machine polishing to remove swirl marks, scratches, and oxidation. Restores showroom clarity.</p>
+        <span class="service-price">Starting at $599</span>
+      </a>
+
+      <!-- Ceramic Coating -->
+      <a href="mailto:arvinsdetailshop@gmail.com?subject=Ceramic%20Coating%20Service%20Request&body=Hi%20Arvin's%20Detail%20Shop,%0D%0A%0D%0AI%27m%20interested%20in%20scheduling%20a%20Ceramic%20Coating%20service%20for%20my%20vehicle.%0D%0A%0D%0AVehicle%20Info:%0D%0A-%20Make/Model:%0D%0A-%20Year:%0D%0A-%20Color:%0D%0A%0D%0APreferred%20Date/Time:%0D%0A%0D%0AAdditional%20Notes:%0D%0A%0D%0AThank%20you!" class="service-card">
+        <div class="service-icon">💎</div>
+        <h2 class="service-name">Ceramic Coating</h2>
+        <p class="service-description">Permanent nano-ceramic protection rated for 5+ years. Ultimate shine and protection against the elements.</p>
+        <span class="service-price">Starting at $999</span>
+      </a>
+
+      <!-- Fleet Services -->
+      <a href="mailto:arvinsdetailshop@gmail.com?subject=Fleet%20Service%20Request&body=Hi%20Arvin's%20Detail%20Shop,%0D%0A%0D%0AI%27m%20interested%20in%20scheduling%20Fleet%20Services%20for%20our%20business.%0D%0A%0D%0ACompany%20Name:%0D%0ANumber%20of%20Vehicles:%0D%0AVehicle%20Types:%0D%0A%0D%0AService%20Type%20Interest:%0D%0A%0D%0APreferred%20Date/Time:%0D%0A%0D%0AAdditional%20Notes:%0D%0A%0D%0AThank%20you!" class="service-card">
+        <div class="service-icon">🏢</div>
+        <h2 class="service-name">Fleet Services</h2>
+        <p class="service-description">Professional cleaning and detailing for dealerships and businesses with multiple vehicles. Volume discounts available.</p>
+        <span class="service-price">Contact for pricing</span>
+      </a>
+    </div>
+
+    <!-- Info Section -->
+    <div class="info-section">
+      <h3>How It Works</h3>
+      <p>1. <strong>Select a service</strong> above that matches your needs.</p>
+      <p>2. <strong>Click the card</strong> — this opens your default email app with a pre-filled message.</p>
+      <p>3. <strong>Fill in your vehicle details</strong> and preferred date/time.</p>
+      <p>4. <strong>Send the email</strong> — we'll respond within 24 hours to confirm your appointment.</p>
+      <p>Prefer to call? <a href="tel:4057432633">(405) 743-2633</a></p>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>Arvin's Detail Shop • Established 1988 • Stillwater, OK</p>
+  </footer>
+</body>
+</html>

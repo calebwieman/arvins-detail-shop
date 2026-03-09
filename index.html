@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arvin's Detail Shop | Stillwater, OK</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --gold: #C9A962;
+      --gold-light: #E8D5A3;
+      --dark: #0A0A0A;
+      --dark-secondary: #141414;
+      --dark-tertiary: #1E1E1E;
+      --text-light: #F5F5F5;
+      --text-muted: #A0A0A0;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--dark);
+      color: var(--text-light);
+      overflow-x: hidden;
+    }
+
+    /* ========== LOADER ========== */
+    #loader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: var(--dark);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      transition: opacity 0.5s ease;
+    }
+
+    #loader.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .loader-bar-container {
+      width: 200px;
+      height: 2px;
+      background: var(--dark-tertiary);
+      margin-bottom: 20px;
+    }
+
+    .loader-bar {
+      height: 100%;
+      width: 0%;
+      background: var(--gold);
+      transition: width 0.2s ease;
+    }
+
+    .loader-text {
+      font-size: 14px;
+      color: var(--text-muted);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    /* ========== CANVAS BACKGROUND ========== */
+    #scrollCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      z-index: 0;
+    }
+
+    #videoOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.45);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* ========== SMART HEADER ========== */
+    #header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 22px 40px;
+      background: rgba(10, 10, 10, 0.8);
+      backdrop-filter: blur(10px);
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+
+    #header.hidden {
+      transform: translateY(-100%);
+      opacity: 0;
+    }
+
+    .header-brand {
+      font-family: 'Playfair Display', serif;
+      font-size: 24px;
+      font-weight: 700;
+      color: #ffffff;
+      text-decoration: none;
+    }
+
+    .header-brand span {
+      color: var(--gold);
+    }
+
+    .header-phone {
+      font-size: 14px;
+      color: #ffffff;
+      text-decoration: none;
+      font-weight: 500;
+      padding: 10px 20px;
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 2px;
+      transition: all 0.3s ease;
+    }
+
+    .header-phone:hover {
+      background: var(--gold);
+      color: var(--dark);
+      border-color: var(--gold);
+    }
+
+    /* ========== HERO SECTION ========== */
+    #hero {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 0 8%;
+    }
+
+    #hero.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.6s ease;
+    }
+
+    .hero-tagline {
+      font-family: 'Jost', sans-serif;
+      font-size: 13px;
+      font-weight: 400;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 16px;
+    }
+
+    #hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(52px, 10vw, 100px);
+      font-weight: 700;
+      color: var(--text-light);
+      line-height: 1.02;
+      margin-bottom: 28px;
+    }
+
+    #hero h1 span {
+      color: var(--gold);
+    }
+
+    #hero p {
+      font-size: clamp(17px, 1.6vw, 22px);
+      color: #ffffff;
+      max-width: 540px;
+      line-height: 1.75;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 18px;
+      margin-top: 44px;
+    }
+
+    .hero-btn {
+      display: inline-block;
+      font-family: 'Jost', sans-serif;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      padding: 18px 36px;
+      text-decoration: none;
+      border-radius: 2px;
+      transition: all 0.3s ease;
+    }
+
+    .hero-btn.primary {
+      background: var(--gold);
+      color: #000000;
+    }
+
+    .hero-btn.primary:hover {
+      background: #ffffff;
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(201, 169, 98, 0.3);
+    }
+
+    .hero-btn.secondary {
+      background: transparent;
+      color: var(--text-light);
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .hero-btn.secondary:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+      transform: translateY(-3px);
+    }
+
+    .scroll-indicator {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #ffffff;
+      font-family: 'Jost', sans-serif;
+      font-size: 10px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+    }
+
+    .scroll-indicator::after {
+      content: '';
+      width: 1px;
+      height: 56px;
+      background: linear-gradient(to bottom, #ffffff, transparent);
+      margin-top: 18px;
+    }
+
+    /* ========== TEXT BLOCKS ========== */
+    .text-block {
+      position: fixed;
+      z-index: 5;
+      opacity: 0;
+      padding: 24px 28px;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 4px;
+      top: 50%;
+      transform: translateY(-50%);
+      max-width: 340px;
+      will-change: transform, opacity;
+    }
+
+    .text-block.left {
+      left: 4%;
+      text-align: left;
+    }
+
+    .text-block.right {
+      right: 4%;
+      text-align: left;
+    }
+
+    .text-block h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(32px, 5vw, 56px);
+      font-weight: 600;
+      line-height: 1.1;
+      margin-bottom: 16px;
+      color: var(--text-light);
+    }
+
+    .text-block p {
+      font-size: clamp(14px, 1.5vw, 18px);
+      line-height: 1.6;
+      color: var(--text-muted);
+    }
+
+    .text-block .highlight {
+      color: var(--gold);
+    }
+
+    .year-badge {
+      display: inline-block;
+      font-family: 'Playfair Display', serif;
+      font-size: 72px;
+      font-weight: 700;
+      color: var(--gold);
+      opacity: 0.3;
+      margin-bottom: 8px;
+    }
+
+    .services-list {
+      list-style: none;
+      margin-top: 20px;
+    }
+
+    .services-list li {
+      font-size: 16px;
+      color: var(--text-light);
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(201, 169, 98, 0.2);
+      display: flex;
+      align-items: center;
+    }
+
+    .services-list li::before {
+      content: '◆';
+      color: var(--gold);
+      margin-right: 12px;
+      font-size: 8px;
+    }
+
+    .testimonial {
+      font-style: italic;
+      font-size: 18px;
+      line-height: 1.8;
+      color: var(--text-light);
+      margin-bottom: 20px;
+    }
+
+    .testimonial-author {
+      font-style: normal;
+      font-size: 14px;
+      color: var(--gold);
+    }
+
+    .hours-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .hours-day {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .hours-time {
+      color: var(--text-light);
+      font-size: 14px;
+      text-align: right;
+    }
+
+    .cta-phone {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(28px, 4vw, 42px);
+      font-weight: 600;
+      color: var(--gold);
+      text-decoration: none;
+      display: block;
+      margin-top: 20px;
+    }
+
+    .cta-address {
+      margin-top: 30px;
+      font-size: 16px;
+      color: var(--text-muted);
+    }
+
+    .map-link {
+      display: inline-block;
+      margin-top: 15px;
+      color: var(--gold);
+      font-size: 14px;
+      text-decoration: underline;
+    }
+
+    /* ========== PHASE 2 - INFO PANEL ========== */
+    #info-panel {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      background: #111111;
+      z-index: 50;
+      transform: translateY(100%);
+      padding: 80px 8%;
+      box-sizing: border-box;
+      overflow-y: auto;
+    }
+
+    .info-header {
+      max-width: 600px;
+      margin-bottom: 48px;
+    }
+
+    .info-eyebrow {
+      display: block;
+      font-family: 'Jost', sans-serif;
+      font-size: 10px;
+      letter-spacing: 0.35em;
+      color: #C9A84C;
+      margin-bottom: 24px;
+    }
+
+    #info-panel h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 64px;
+      font-weight: 400;
+      color: #FFFFFF;
+      line-height: 1.05;
+      margin-bottom: 24px;
+    }
+
+    #info-panel > p {
+      font-family: 'Jost', sans-serif;
+      font-size: 14px;
+      color: rgba(255,255,255,0.55);
+      line-height: 1.8;
+      max-width: 420px;
+      margin-bottom: 36px;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2px;
+      background: rgba(255,255,255,0.06);
+      border-top: 1px solid rgba(201,168,76,0.2);
+      border-bottom: 1px solid rgba(201,168,76,0.2);
+      margin-bottom: 48px;
+    }
+
+    .info-card {
+      padding: 32px 24px;
+      background: #111111;
+    }
+
+    .card-number {
+      display: block;
+      font-family: 'Jost', sans-serif;
+      font-size: 10px;
+      letter-spacing: 0.3em;
+      color: #C9A84C;
+      margin-bottom: 16px;
+    }
+
+    .info-card h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 22px;
+      font-weight: 400;
+      color: #FFFFFF;
+      margin-bottom: 10px;
+    }
+
+    .info-card p {
+      font-family: 'Jost', sans-serif;
+      font-size: 12px;
+      color: rgba(255,255,255,0.45);
+      line-height: 1.7;
+    }
+
+    /* ========== CONTACT FORM ========== */
+    .contact-form {
+      padding-top: 48px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      max-width: 600px;
+    }
+
+    .contact-form h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 28px;
+      font-weight: 400;
+      color: #FFFFFF;
+      margin-bottom: 24px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      font-family: 'Jost', sans-serif;
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.5);
+      margin-bottom: 8px;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 14px 16px;
+      font-family: 'Jost', sans-serif;
+      font-size: 14px;
+      color: #FFFFFF;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 2px;
+      outline: none;
+      transition: border-color 0.3s ease;
+      box-sizing: border-box;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      border-color: var(--gold);
+    }
+
+    .form-group input::placeholder,
+    .form-group textarea::placeholder {
+      color: rgba(255,255,255,0.3);
+    }
+
+    .form-group textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    .form-group select {
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='rgba(255,255,255,0.5)' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 16px center;
+    }
+
+    .form-group select option {
+      background: #111111;
+      color: #FFFFFF;
+    }
+
+    .submit-btn {
+      display: inline-block;
+      font-family: 'Jost', sans-serif;
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      padding: 16px 40px;
+      background: var(--gold);
+      color: #111111;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 8px;
+    }
+
+    .submit-btn:hover {
+      background: #fff;
+    }
+
+    .info-footer {
+      margin-top: 48px;
+      display: flex;
+      justify-content: space-between;
+      font-family: 'Jost', sans-serif;
+      font-size: 11px;
+      color: rgba(255,255,255,0.25);
+    }
+
+    /* ========== MOBILE ========== */
+    @media (max-width: 768px) {
+      #header {
+        padding: 16px 20px;
+      }
+
+      .header-brand {
+        font-size: 18px;
+      }
+
+      .header-phone {
+        font-size: 12px;
+        padding: 8px 12px;
+      }
+
+      .hero-buttons {
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .text-block {
+        padding: 20px;
+        max-width: 300px;
+      }
+
+      .text-block h2 {
+        font-size: 28px;
+      }
+
+      .year-badge {
+        font-size: 48px;
+      }
+
+      .hours-grid {
+        grid-template-columns: 1fr;
+      }
+
+      #info-panel {
+        padding: 40px 6%;
+      }
+
+      #info-panel h2 {
+        font-size: 36px;
+      }
+
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Loader -->
+  <div id="loader">
+    <div class="loader-bar-container">
+      <div class="loader-bar" id="loaderBar"></div>
+    </div>
+    <div class="loader-text">Loading Experience</div>
+  </div>
+
+  <!-- Canvas Background -->
+  <canvas id="scrollCanvas"></canvas>
+  
+  <!-- Video Overlay -->
+  <div id="videoOverlay"></div>
+
+  <!-- Smart Header -->
+  <header id="header">
+    <a href="#" class="header-brand">Arvin's <span>Detail Shop</span></a>
+    <a href="tel:4057432633" class="header-phone">(405) 743-2633</a>
+  </header>
+
+  <!-- Hero Section -->
+  <section id="hero">
+    <span class="hero-tagline">Stillwater, Oklahoma</span>
+    <h1>Where Luxury<br>Meets <span>Perfection</span></h1>
+    <p>Premium auto detailing excellence for those who demand the absolute best</p>
+    <div class="hero-buttons">
+      <a href="tel:4057432633" class="hero-btn secondary">Call Us</a>
+      <a href="schedule.html" class="hero-btn primary">Schedule Now</a>
+      <a href="#quote" class="hero-btn secondary" data-scroll-to-quote>Get Quote</a>
+    </div>
+    <div class="scroll-indicator">Scroll to explore</div>
+  </section>
+
+  <!-- Text Blocks -->
+  <div class="text-block left" data-start="0.10" data-end="0.23">
+    <span class="year-badge">1988</span>
+    <h2>A Legacy of<br><span class="highlight">Excellence</span></h2>
+    <p>For over 35 years, Arvin Thames has been setting the standard for auto detailing in Stillwater.</p>
+  </div>
+
+  <div class="text-block right" data-start="0.24" data-end="0.37">
+    <h2>5.0 Stars.<br><span class="highlight">No Exceptions.</span></h2>
+    <p>Customers describe us as thorough, meticulous, and professionals who go above and beyond.</p>
+  </div>
+
+  <div class="text-block left" data-start="0.38" data-end="0.52">
+    <h2>Complete<br><span class="highlight">Detailing</span></h2>
+    <ul class="services-list">
+      <li>Interior Detailing</li>
+      <li>Exterior Detailing</li>
+      <li>Professional Car Washing</li>
+      <li>Paint Polishing & Correction</li>
+      <li>Dealership Fleet Cleaning</li>
+    </ul>
+  </div>
+
+  <div class="text-block right" data-start="0.53" data-end="0.67">
+    <h2>What Clients<br><span class="highlight">Say</span></h2>
+    <p class="testimonial">"Arvin's is the only place I trust with my Mercedes. The attention to detail is unmatched anywhere in Oklahoma."</p>
+    <p class="testimonial-author">— James M., Oklahoma City</p>
+  </div>
+
+  <div class="text-block right" data-start="0.68" data-end="0.82">
+    <h2>Visit <span class="highlight">Us</span></h2>
+    <p>1020 S Main St, Stillwater, OK 74074</p>
+    <a href="https://maps.google.com/?q=1020+S+Main+St+Stillwater+OK" target="_blank" class="map-link">Open in Google Maps →</a>
+    <div class="hours-grid">
+      <span class="hours-day">Monday – Friday</span>
+      <span class="hours-time">8:00 AM – 6:00 PM</span>
+      <span class="hours-day">Saturday</span>
+      <span class="hours-time">9:00 AM – 4:00 PM</span>
+      <span class="hours-day">Sunday</span>
+      <span class="hours-time">Closed</span>
+    </div>
+  </div>
+
+  <div class="text-block left" data-start="0.83" data-end="0.97">
+    <h2>Ready for<br><span class="highlight">Perfection?</span></h2>
+    <p>Book your appointment today</p>
+    <a href="tel:4057432633" class="cta-phone">(405) 743-2633</a>
+    <p class="cta-address">Arvin's Detail Shop • Established 1988</p>
+  </div>
+
+  <!-- Phase 2 - Info Panel -->
+  <div id="info-panel">
+    <div class="info-header">
+      <span class="info-eyebrow">ARVIN'S DETAIL SHOP — EST. 1988</span>
+      <h2>The Standard<br>for Perfection.</h2>
+      <p>Every vehicle that leaves our care is a testament to obsessive craftsmanship. We don't cut corners — we remove them.</p>
+    </div>
+
+    <div class="info-grid">
+      <div class="info-card">
+        <span class="card-number">01</span>
+        <h3>Full Detail</h3>
+        <p>A comprehensive interior and exterior treatment from $349.</p>
+      </div>
+      <div class="info-card">
+        <span class="card-number">02</span>
+        <h3>Paint Correction</h3>
+        <p>Multi-stage machine polishing to restore showroom clarity from $599.</p>
+      </div>
+      <div class="info-card">
+        <span class="card-number">03</span>
+        <h3>Ceramic Coating</h3>
+        <p>Permanent nano-ceramic protection rated for 5+ years from $999.</p>
+      </div>
+      <div class="info-card">
+        <span class="card-number">04</span>
+        <h3>Interior Detail</h3>
+        <p>Deep clean, condition, and protect every surface inside from $249.</p>
+      </div>
+    </div>
+
+    <!-- Contact Form -->
+    <div class="contact-form" id="quote">
+      <h3>Request a Quote</h3>
+      <form>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Name</label>
+            <input type="text" placeholder="Your name" required>
+          </div>
+          <div class="form-group">
+            <label>Phone</label>
+            <input type="tel" placeholder="(405) 555-0123">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" placeholder="you@example.com" required>
+        </div>
+        <div class="form-group">
+          <label>Service Interested In</label>
+          <select>
+            <option value="">Select a service...</option>
+            <option value="full-detail">Full Detail</option>
+            <option value="interior-detail">Interior Detail</option>
+            <option value="exterior-detail">Exterior Detail</option>
+            <option value="paint-correction">Paint Correction</option>
+            <option value="ceramic-coating">Ceramic Coating</option>
+            <option value="fleet">Fleet Services</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Message</label>
+          <textarea placeholder="Tell us about your vehicle and any specific concerns..."></textarea>
+        </div>
+        <button type="submit" class="submit-btn">Submit Request</button>
+      </form>
+    </div>
+
+    <div class="info-footer">
+      <span>© 2026 Arvin's Detail Shop. All rights reserved.</span>
+      <span>Stillwater, OK</span>
+    </div>
+  </div>
+
+  <!-- Spacer for scroll -->
+  <div style="height: 50vh;"></div>
+
+  <script>
+    // ========== SCROLL-DRIVEN VIDEO ==========
+    const canvas = document.getElementById('scrollCanvas');
+    const ctx = canvas.getContext('2d');
+    const loader = document.getElementById('loader');
+    const header = document.getElementById('header');
+    const hero = document.getElementById('hero');
+    const videoOverlay = document.getElementById('videoOverlay');
+    const infoPanel = document.getElementById('info-panel');
+    const textBlocks = document.querySelectorAll('.text-block');
+
+    // Smart header
+    let lastScrollY = 0;
+    let headerVisible = true;
+
+    // Frame configuration
+    const FRAME_COUNT = 482;
+    const PHASE_SPLIT = 0.70;
+    const FRAME_PATH = 'frames/frame_';
+    const FRAME_EXT = '.jpg';
+    const FRAME_OFFSET = 1;
+
+    // Frame cache
+    const frameCache = new Map();
+    let currentFrame = -1;
+    let ticking = false;
+
+    // Resize canvas
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    // Load frame
+    function loadFrame(index) {
+      if (frameCache.has(index)) return frameCache.get(index);
+      
+      const img = new Image();
+      const frameNum = String(index + FRAME_OFFSET).padStart(3, '0');
+      img.src = `${FRAME_PATH}${frameNum}${FRAME_EXT}`;
+      frameCache.set(index, img);
+      return img;
+    }
+
+    // Draw frame
+    function drawFrame(index) {
+      const img = loadFrame(index);
+      if (img.complete && img.naturalWidth !== 0) {
+        const canvasRatio = canvas.width / canvas.height;
+        const imgRatio = img.naturalWidth / img.naturalHeight;
+        
+        let sx, sy, sw, sh;
+        
+        if (imgRatio > canvasRatio) {
+          sh = img.naturalHeight;
+          sw = sh * canvasRatio;
+          sy = 0;
+          sx = (img.naturalWidth - sw) / 2;
+        } else {
+          sw = img.naturalWidth;
+          sh = sw / canvasRatio;
+          sx = 0;
+          sy = (img.naturalHeight - sh) / 2;
+        }
+        
+        ctx.drawImage(img, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
+      }
+    }
+
+    // Priority load frames
+    function priorityLoad(scrollFraction) {
+      const frameFraction = scrollFraction / PHASE_SPLIT;
+      const targetFrame = Math.floor(frameFraction * FRAME_COUNT);
+      for (let i = -2; i <= 5; i++) {
+        const frameIndex = targetFrame + i;
+        if (frameIndex >= 0 && frameIndex < FRAME_COUNT) {
+          loadFrame(frameIndex);
+        }
+      }
+    }
+
+    // Background load all
+    function backgroundLoad() {
+      for (let i = 0; i < FRAME_COUNT; i++) {
+        if (!frameCache.has(i)) loadFrame(i);
+      }
+    }
+
+    // Check frames loaded
+    function checkFramesLoaded() {
+      let loaded = 0;
+      frameCache.forEach(img => {
+        if (img.complete && img.naturalWidth !== 0) loaded++;
+      });
+      return { loaded, total: FRAME_COUNT };
+    }
+
+    // Initialize
+    function init() {
+      resizeCanvas();
+      
+      // Draw first frame
+      const firstFrame = loadFrame(0);
+      const tryDrawFirstFrame = () => {
+        if (firstFrame.complete && firstFrame.naturalWidth !== 0) {
+          drawFrame(0);
+          currentFrame = 0;
+        }
+      };
+      tryDrawFirstFrame();
+      setTimeout(tryDrawFirstFrame, 100);
+      setTimeout(tryDrawFirstFrame, 500);
+
+      // Priority load
+      for (let i = 0; i < 10; i++) loadFrame(i);
+      setTimeout(backgroundLoad, 100);
+
+      // Progress checker
+      const checkInterval = setInterval(() => {
+        const { loaded, total } = checkFramesLoaded();
+        const loaderBar = document.getElementById('loaderBar');
+        if (loaderBar) loaderBar.style.width = (loaded / total * 100) + '%';
+        
+        if (loaded >= total) {
+          clearInterval(checkInterval);
+          if (loader) loader.classList.add('hidden');
+        }
+      }, 100);
+
+      // Fallback hide loader
+      setTimeout(() => {
+        clearInterval(checkInterval);
+        if (loader) loader.classList.add('hidden');
+      }, 8000);
+
+      // Handle quote scroll
+      if (window.location.hash === '#quote') {
+        setTimeout(() => {
+          const quoteSection = document.getElementById('quote');
+          if (quoteSection) quoteSection.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+      }
+    }
+
+    // Get Quote button handler
+    document.querySelectorAll('[data-scroll-to-quote]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        // Scroll to trigger phase 2
+        const scrollHeight = document.body.scrollHeight - window.innerHeight;
+        const targetScroll = PHASE_SPLIT * scrollHeight;
+        window.scrollTo({ top: targetScroll, behavior: 'smooth' });
+      });
+    });
+
+    // Scroll handler
+    window.addEventListener('scroll', () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          const scrollFraction = window.scrollY / (document.body.scrollHeight - window.innerHeight);
+
+          // Smart header
+          const currentScrollY = window.scrollY;
+          if (currentScrollY > lastScrollY && currentScrollY > 100) {
+            if (headerVisible && header) {
+              header.classList.add('hidden');
+              headerVisible = false;
+            }
+          } else {
+            if (!headerVisible && header) {
+              header.classList.remove('hidden');
+              headerVisible = true;
+            }
+          }
+          lastScrollY = currentScrollY;
+
+          // Hero visibility
+          if (scrollFraction > 0.02 && hero) {
+            hero.classList.add('hidden');
+            videoOverlay.style.opacity = '0';
+          } else if (scrollFraction <= 0.02 && hero) {
+            hero.classList.remove('hidden');
+            videoOverlay.style.opacity = '1';
+          }
+
+          // Phase 1 - video frames
+          if (scrollFraction <= PHASE_SPLIT) {
+            const frameFraction = scrollFraction / PHASE_SPLIT;
+            let frameIndex = Math.min(Math.floor(frameFraction * FRAME_COUNT), FRAME_COUNT - 1);
+            
+            if (scrollFraction < 0.01) frameIndex = 0;
+            
+            if (frameIndex !== currentFrame) {
+              currentFrame = frameIndex;
+              drawFrame(currentFrame);
+              priorityLoad(scrollFraction);
+            }
+            
+            // Hide info panel
+            infoPanel.style.transform = 'translateY(100%)';
+          } else {
+            // Phase 2 - freeze frame and slide up panel
+            if (currentFrame !== FRAME_COUNT - 1) {
+              currentFrame = FRAME_COUNT - 1;
+              drawFrame(currentFrame);
+            }
+            
+            const panelProgress = (scrollFraction - PHASE_SPLIT) / (1 - PHASE_SPLIT);
+            const translateY = (1 - panelProgress) * 100;
+            infoPanel.style.transform = `translateY(${translateY}%)`;
+          }
+
+          // Text blocks animation
+          textBlocks.forEach(block => {
+            const start = parseFloat(block.dataset.start) * PHASE_SPLIT;
+            const end = parseFloat(block.dataset.end) * PHASE_SPLIT;
+            
+            if (scrollFraction >= start && scrollFraction <= end) {
+              const progress = (scrollFraction - start) / (end - start);
+              const opacity = progress < 0.2 ? progress / 0.2 : progress > 0.8 ? (1 - progress) / 0.2 : 1;
+              const translateY = (1 - Math.min(progress / 0.2, 1)) * 60;
+              
+              let translateX = 0;
+              if (block.classList.contains('left')) {
+                translateX = (1 - Math.min(progress / 0.2, 1)) * -60;
+              } else if (block.classList.contains('right')) {
+                translateX = (1 - Math.min(progress / 0.2, 1)) * 60;
+              }
+              
+              block.style.opacity = opacity;
+              block.style.transform = `translateY(calc(-50% + ${translateY}px)) translateX(${translateX}px)`;
+            } else {
+              block.style.opacity = 0;
+            }
+          });
+
+          ticking = false;
+        });
+        ticking = true;
+      }
+    });
+
+    init();
+  </script>
+</body>
+</html>
