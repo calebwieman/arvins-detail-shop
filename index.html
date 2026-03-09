@@ -110,7 +110,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 22px 40px;
+      padding: 16px 30px;
       background: rgba(10, 10, 10, 0.8);
       backdrop-filter: blur(10px);
       transition: transform 0.3s ease, opacity 0.3s ease;
@@ -205,7 +205,7 @@
     .hero-buttons {
       display: flex;
       gap: 18px;
-      margin-top: 24px;
+      margin-top: 8px;
     }
 
     .hero-btn {
@@ -611,6 +611,17 @@
       .hero-buttons {
         flex-direction: column;
         gap: 12px;
+        align-items: center;
+      }
+
+      .hero-btn.secondary {
+        display: none;
+      }
+
+      .hero-btn.primary {
+        width: 100%;
+        max-width: 280px;
+        text-align: center;
       }
 
       .text-block {
