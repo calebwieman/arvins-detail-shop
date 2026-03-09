@@ -828,8 +828,7 @@
 
     // Frame configuration
     const FRAME_COUNT = 482;
-    const PHASE_SPLIT = 0.70;
-    const SCROLL_SENSITIVITY = 0.25; // Lower = less sensitive
+    const PHASE_SPLIT = 0.35; // Lower = more scroll needed for video (less sensitive)
     const FRAME_PATH = 'frames/frame_';
     const FRAME_EXT = '.jpg';
     const FRAME_OFFSET = 1;
@@ -885,7 +884,7 @@
 
     // Priority load frames
     function priorityLoad(scrollFraction) {
-      const frameFraction = (scrollFraction * SCROLL_SENSITIVITY) / PHASE_SPLIT;
+      const frameFraction = scrollFraction / PHASE_SPLIT;
       const targetFrame = Math.floor(frameFraction * FRAME_COUNT);
       for (let i = -2; i <= 5; i++) {
         const frameIndex = targetFrame + i;
@@ -1001,7 +1000,7 @@
 
           // Phase 1 - video frames
           if (scrollFraction <= PHASE_SPLIT) {
-            const frameFraction = (scrollFraction * SCROLL_SENSITIVITY) / PHASE_SPLIT;
+            const frameFraction = scrollFraction / PHASE_SPLIT;
             let frameIndex = Math.min(Math.floor(frameFraction * FRAME_COUNT), FRAME_COUNT - 1);
             
             if (scrollFraction < 0.01) frameIndex = 0;
