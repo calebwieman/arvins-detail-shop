@@ -831,8 +831,12 @@
 
     // Resize canvas
     function resizeCanvas() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = window.innerWidth * dpr;
+      canvas.height = window.innerHeight * dpr;
+      canvas.style.width = window.innerWidth + 'px';
+      canvas.style.height = window.innerHeight + 'px';
+      ctx.scale(dpr, dpr);
     }
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
@@ -929,8 +933,8 @@
       setTimeout(tryDrawFirstFrame, 100);
       setTimeout(tryDrawFirstFrame, 500);
 
-      // Priority load first 50 frames
-      for (let i = 0; i < 50; i++) loadFrame(i);
+      // Priority load first 100 frames for better quality
+      for (let i = 0; i < 100; i++) loadFrame(i);
       setTimeout(backgroundLoad, 100);
 
       // Progress checker
