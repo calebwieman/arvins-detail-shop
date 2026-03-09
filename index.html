@@ -812,7 +812,7 @@
   </div>
 
   <!-- Spacer for scroll -->
-  <div style="height: 500vh;"></div>
+  </div>
 
   <script>
     // ========== SCROLL-DRIVEN VIDEO ==========
@@ -1007,22 +1007,21 @@
 
           // Phase 1 - video frames
           if (scrollFraction <= PHASE_SPLIT) {
-            const frameFraction = scrollFraction / PHASE_SPLIT;
-            let frameIndex = Math.min(Math.floor(frameFraction * FRAME_COUNT), FRAME_COUNT - 1);
+            let frameIndex;
             
             // Always draw frame 0 when at very top (fixes black screen on mobile)
             if (scrollFraction < 0.02) {
               frameIndex = 0;
+            } else {
+              const frameFraction = scrollFraction / PHASE_SPLIT;
+              frameIndex = Math.min(Math.floor(frameFraction * FRAME_COUNT), FRAME_COUNT - 1);
             }
             
-            if (frameIndex !== currentFrame) {
+            // Always call drawFrame to ensure frame is rendered
+            if (frameIndex !== currentFrame || scrollFraction < 0.02) {
               currentFrame = frameIndex;
               drawFrame(currentFrame);
               priorityLoad(scrollFraction);
-            } else if (scrollFraction < 0.02 && currentFrame !== 0) {
-              // Force redraw of frame 0 when scrolling back to top
-              currentFrame = 0;
-              drawFrame(0);
             }
           } else {
             // Phase 2 - freeze frame
@@ -1064,5 +1063,8 @@
 
     init();
   </script>
+
+  <!-- Bottom spacer -->
+  <div style="height: 10vh;"></div>
 </body>
 </html>
