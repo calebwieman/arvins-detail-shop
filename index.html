@@ -32,7 +32,7 @@
       font-family: 'Inter', sans-serif;
       background: var(--dark);
       color: var(--text-light);
-      min-height: 600vh;
+      min-height: 1000vh;
       overflow-x: hidden;
     }
 
@@ -401,14 +401,11 @@
 
     /* ========== PHASE 2 - INFO PANEL ========== */
     #info-panel {
-      position: fixed;
-      bottom: 0;
-      left: 0;
+      position: relative;
       width: 100%;
-      height: 100vh;
+      min-height: 100vh;
       background: #111111;
       z-index: 50;
-      transform: translateY(100%);
       padding: 80px 8%;
       box-sizing: border-box;
     }
@@ -1025,19 +1022,12 @@
               drawFrame(currentFrame);
               priorityLoad(scrollFraction);
             }
-            
-            // Hide info panel
-            infoPanel.style.transform = 'translateY(100%)';
           } else {
-            // Phase 2 - freeze frame and slide up panel
+            // Phase 2 - freeze frame
             if (currentFrame !== FRAME_COUNT - 1) {
               currentFrame = FRAME_COUNT - 1;
               drawFrame(currentFrame);
             }
-            
-            const panelProgress = (scrollFraction - PHASE_SPLIT) / (1 - PHASE_SPLIT);
-            const translateY = (1 - panelProgress) * 100;
-            infoPanel.style.transform = `translateY(${translateY}%)`;
           }
 
           // Text blocks animation
