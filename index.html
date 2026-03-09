@@ -88,6 +88,7 @@
       height: 100vh;
       object-fit: cover;
       z-index: 0;
+      background: #0A0A0A;
     }
 
     #videoOverlay {
@@ -922,15 +923,23 @@
     function init() {
       resizeCanvas();
       
-      // Draw first frame
+      // Draw first frame immediately
+      drawFrame(0);
+      currentFrame = 0;
+      
+      // Also set up onload handler
       const firstFrame = loadFrame(0);
+      firstFrame.onload = () => {
+        drawFrame(0);
+        currentFrame = 0;
+      };
+      
       const tryDrawFirstFrame = () => {
         if (firstFrame.complete && firstFrame.naturalWidth !== 0) {
           drawFrame(0);
           currentFrame = 0;
         }
       };
-      tryDrawFirstFrame();
       setTimeout(tryDrawFirstFrame, 100);
       setTimeout(tryDrawFirstFrame, 500);
 
