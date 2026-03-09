@@ -415,8 +415,31 @@
     }
 
     .info-header {
-      max-width: 600px;
+      display: flex;
+      gap: 48px;
       margin-bottom: 48px;
+    }
+
+    .info-header-left {
+      flex: 1;
+      max-width: 500px;
+    }
+
+    .info-header-right {
+      flex: 1;
+      max-width: 300px;
+      padding-top: 60px;
+    }
+
+    .info-header-right p {
+      font-size: 14px;
+      color: #fff;
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+
+    .info-header-right .hours-grid {
+      margin-top: 20px;
     }
 
     .info-eyebrow {
@@ -695,18 +718,18 @@
   </section>
 
   <!-- Text Blocks -->
-  <div class="text-block left" data-start="0.10" data-end="0.23">
+  <div class="text-block left" data-start="0.08" data-end="0.18">
     <span class="year-badge">1988</span>
     <h2>A Legacy of<br><span class="highlight">Excellence</span></h2>
     <p>For over 35 years, Arvin Thames has been setting the standard for auto detailing in Stillwater.</p>
   </div>
 
-  <div class="text-block right" data-start="0.24" data-end="0.37">
+  <div class="text-block right" data-start="0.19" data-end="0.29">
     <h2>5.0 Stars.<br><span class="highlight">No Exceptions.</span></h2>
     <p>Customers describe us as thorough, meticulous, and professionals who go above and beyond.</p>
   </div>
 
-  <div class="text-block left" data-start="0.38" data-end="0.52">
+  <div class="text-block left" data-start="0.30" data-end="0.42">
     <h2>Complete<br><span class="highlight">Detailing</span></h2>
     <ul class="services-list">
       <li>Interior Detailing</li>
@@ -717,32 +740,32 @@
     </ul>
   </div>
 
-  <div class="text-block right" data-start="0.53" data-end="0.67">
+  <div class="text-block right" data-start="0.43" data-end="0.54">
     <h2>What Clients<br><span class="highlight">Say</span></h2>
     <p class="testimonial">"Arvin's is the only place I trust with my Mercedes. The attention to detail is unmatched anywhere in Oklahoma."</p>
     <p class="testimonial-author">— James M., Oklahoma City</p>
   </div>
 
-  <div class="text-block right" data-start="0.68" data-end="0.82">
-    <h2>Visit <span class="highlight">Us</span></h2>
-    <p>1020 S Main St, Stillwater, OK 74074</p>
-    <a href="https://maps.google.com/?q=1020+S+Main+St+Stillwater+OK" target="_blank" class="map-link">Open in Google Maps →</a>
-    <div class="hours-grid">
-      <span class="hours-day">Monday – Friday</span>
-      <span class="hours-time">8:00 AM – 6:00 PM</span>
-      <span class="hours-day">Saturday</span>
-      <span class="hours-time">9:00 AM – 4:00 PM</span>
-      <span class="hours-day">Sunday</span>
-      <span class="hours-time">Closed</span>
-    </div>
-  </div>
-
   <!-- Phase 2 - Info Panel -->
   <div id="info-panel">
     <div class="info-header">
-      <span class="info-eyebrow">ARVIN'S DETAIL SHOP — EST. 1988</span>
-      <h2>The Standard<br>for Perfection.</h2>
-      <p>Every vehicle that leaves our care is a testament to obsessive craftsmanship. We don't cut corners — we remove them.</p>
+      <div class="info-header-left">
+        <span class="info-eyebrow">ARVIN'S DETAIL SHOP — EST. 1988</span>
+        <h2>The Standard<br>for Perfection.</h2>
+        <p>Every vehicle that leaves our care is a testament to obsessive craftsmanship. We don't cut corners — we remove them.</p>
+      </div>
+      <div class="info-header-right">
+        <p><strong>Visit Us</strong><br>1020 S Main St, Stillwater, OK 74074</p>
+        <a href="https://maps.google.com/?q=1020+S+Main+St+Stillwater+OK" target="_blank" class="map-link">Open in Google Maps →</a>
+        <div class="hours-grid">
+          <span class="hours-day">Mon – Fri</span>
+          <span class="hours-time">8AM – 6PM</span>
+          <span class="hours-day">Saturday</span>
+          <span class="hours-time">9AM – 4PM</span>
+          <span class="hours-day">Sunday</span>
+          <span class="hours-time">Closed</span>
+        </div>
+      </div>
     </div>
 
     <div class="info-grid">
