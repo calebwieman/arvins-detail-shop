@@ -735,13 +735,6 @@
     </div>
   </div>
 
-  <div class="text-block left" data-start="0.83" data-end="0.97">
-    <h2>Ready for<br><span class="highlight">Perfection?</span></h2>
-    <p>Book your appointment today</p>
-    <a href="tel:4057432633" class="cta-phone">(405) 743-2633</a>
-    <p class="cta-address">Arvin's Detail Shop • Established 1988</p>
-  </div>
-
   <!-- Phase 2 - Info Panel -->
   <div id="info-panel">
     <div class="info-header">
@@ -1017,12 +1010,19 @@
             const frameFraction = scrollFraction / PHASE_SPLIT;
             let frameIndex = Math.min(Math.floor(frameFraction * FRAME_COUNT), FRAME_COUNT - 1);
             
-            if (scrollFraction < 0.01) frameIndex = 0;
+            // Always draw frame 0 when at very top (fixes black screen on mobile)
+            if (scrollFraction < 0.02) {
+              frameIndex = 0;
+            }
             
             if (frameIndex !== currentFrame) {
               currentFrame = frameIndex;
               drawFrame(currentFrame);
               priorityLoad(scrollFraction);
+            } else if (scrollFraction < 0.02 && currentFrame !== 0) {
+              // Force redraw of frame 0 when scrolling back to top
+              currentFrame = 0;
+              drawFrame(0);
             }
           } else {
             // Phase 2 - freeze frame
