@@ -1120,7 +1120,7 @@
       // to start at index 80 (since 0–79 and checkpoints are already queued below),
       // avoiding redundant iteration over already-loading frames.
       // Preload first 150 frames
-      for (let i = 0; i < 150; i++) loadFrame(i);
+      for (let i = 0; i < 50; i++) loadFrame(i);
       // Then load every 5th frame after that
       for (let i = 150; i < FRAME_COUNT; i += 5) loadFrame(i);
 
