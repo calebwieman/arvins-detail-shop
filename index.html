@@ -929,6 +929,7 @@
     // Frame configuration
     const FRAME_COUNT = 482;
     const PHASE_SPLIT = 0.85;
+    let lastDrawnFrame = -1;
     
     // Mobile detection and scroll sensitivity
     const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
@@ -1168,8 +1169,9 @@
             }
             
             // Only redraw if frame changed OR if at very top (to fix pull-down blank issue)
-            if (frameIndex !== currentFrame || scrollFraction < 0.001) {
+            if (frameIndex !== lastDrawnFrame || scrollFraction < 0.001) {
               currentFrame = frameIndex;
+              lastDrawnFrame = frameIndex;
               drawFrame(currentFrame);
               priorityLoad(effectiveScroll);
             }
