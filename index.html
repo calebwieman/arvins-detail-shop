@@ -1119,9 +1119,10 @@
       // FIX #9: Removed dead backgroundLoad() call and fixed continueBackgroundLoad
       // to start at index 80 (since 0–79 and checkpoints are already queued below),
       // avoiding redundant iteration over already-loading frames.
-      const CHECKPOINTS = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0].map(p => Math.floor(p * FRAME_COUNT));
-      CHECKPOINTS.forEach(i => loadFrame(i));
+      // Preload first 150 frames
       for (let i = 0; i < 150; i++) loadFrame(i);
+      // Then load every 5th frame after that
+      for (let i = 150; i < FRAME_COUNT; i += 5) loadFrame(i);
 
       const loaderBar = document.getElementById('loaderBar');
       if (loaderBar) loaderBar.style.width = '15%';
