@@ -949,6 +949,7 @@
       if (frameCache.has(index)) return frameCache.get(index);
       
       const img = new Image();
+      img.decoding = 'async'; // Non-blocking decode
       const frameNum = String(index + FRAME_OFFSET).padStart(3, '0');
       img.src = `${FRAME_PATH}${frameNum}${FRAME_EXT}`;
       frameCache.set(index, img);
@@ -1036,38 +1037,45 @@
       setTimeout(tryDrawFirstFrame, 100);
       setTimeout(tryDrawFirstFrame, 500);
 
-      // First preload every 5th frame
-      for (let i = 0; i < FRAME_COUNT; i += 5) loadFrame(i);
-      // Then preload first 200 frames
-      for (let i = 0; i < 200; i++) loadFrame(i);
-      setTimeout(backgroundLoad, 100);
-
-      // Load ALL frames and wait for all to complete
-      const loaderBar = document.getElementById('loaderBar');
+      // Checkpoint preloading - load keyframes first for immediate scrolling
+      const CHECKPOINTS = [0, 0.25, 0.5, 0.75, 1.0].map(p => Math.floor(p * FRAME_COUNT));
+      CHECKPOINTS.forEach(i => loadFrame(i));
       
-      const loadAllFrames = async () => {
-        for (let i = 0; i < FRAME_COUNT; i++) {
-          const img = loadFrame(i);
-          if (loaderBar) {
-            loaderBar.style.width = ((i + 1) / FRAME_COUNT * 100) + '%';
-          }
-          // Wait for this image to load before proceeding
-          if (!img.complete || img.naturalWidth === 0) {
-            await new Promise(resolve => {
-              img.onload = () => resolve();
-              img.onerror = () => resolve();
-            });
+      // Update loader bar for checkpoints
+      const loaderBar = document.getElementById('loaderBar');
+      if (loaderBar) loaderBar.style.width = '10%';
+      
+      // Background load remaining frames using requestIdleCallback
+      function continueBackgroundLoad(startIdx) {
+        const endIdx = Math.min(startIdx + 20, FRAME_COUNT); // Load 20 at a time
+        
+        for (let i = startIdx; i < endIdx; i++) {
+          if (!CHECKPOINTS.includes(i)) {
+            loadFrame(i);
           }
         }
         
-        // All frames loaded
-        if (loaderBar) loaderBar.style.width = '100%';
-        setTimeout(() => {
-          if (loader) loader.classList.add('hidden');
-        }, 200);
-      };
+        // Update progress
+        if (loaderBar) {
+          const progress = (endIdx / FRAME_COUNT * 90) + 10;
+          loaderBar.style.width = progress + '%';
+        }
+        
+        if (endIdx < FRAME_COUNT) {
+          requestIdleCallback(() => continueBackgroundLoad(endIdx), { timeout: 2000 });
+        } else {
+          // All loaded
+          if (loaderBar) loaderBar.style.width = '100%';
+          setTimeout(() => {
+            if (loader) loader.classList.add('hidden');
+          }, 300);
+        }
+      }
       
-      loadAllFrames();
+      // Start background loading after short delay
+      setTimeout(() => {
+        requestIdleCallback(() => continueBackgroundLoad(0), { timeout: 1000 });
+      }, 500);
 
       // Handle quote scroll
       if (window.location.hash === '#quote') {
@@ -1089,7 +1097,7 @@
       });
     });
 
-    // Scroll handler
+    // Scroll handler with passive listener
     window.addEventListener('scroll', () => {
       if (!ticking) {
         requestAnimationFrame(() => {
