@@ -421,17 +421,13 @@
 
     /* ========== PHASE 2 - INFO PANEL ========== */
     #info-panel {
-      position: fixed;
-      bottom: 0;
-      left: 0;
+      position: relative;
       width: 100%;
-      height: 200vh;
+      min-height: 250vh;
       background: #111111;
       z-index: 50;
-      transform: translateY(100%);
       padding: 80px 8%;
       box-sizing: border-box;
-      overflow-y: auto;
     }
 
     .info-header {
@@ -1141,19 +1137,7 @@
             }
             
             // Hide info panel in Phase 1
-            infoPanel.style.transform = 'translateY(100%)';
-          } else {
-            // Phase 2 - freeze frame and slide up panel
-            if (currentFrame !== FRAME_COUNT - 1) {
-              currentFrame = FRAME_COUNT - 1;
-              drawFrame(currentFrame);
-            }
             
-            // Slide up info panel
-            const panelProgress = (scrollFraction - PHASE_SPLIT) / (1 - PHASE_SPLIT);
-            const translateY = (1 - panelProgress) * 100;
-            infoPanel.style.transform = `translateY(${translateY}%)`;
-          }
 
           // Text blocks animation
           textBlocks.forEach(block => {
