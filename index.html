@@ -1167,10 +1167,12 @@
               frameIndex = Math.min(Math.floor(frameFraction * FRAME_COUNT), FRAME_COUNT - 1);
             }
             
-            // Always call drawFrame in Phase 1 to ensure frame is rendered
-            currentFrame = frameIndex;
-            drawFrame(currentFrame);
-            priorityLoad(effectiveScroll);
+            // Only redraw if frame changed OR if at very top (to fix pull-down blank issue)
+            if (frameIndex !== currentFrame || scrollFraction < 0.01) {
+              currentFrame = frameIndex;
+              drawFrame(currentFrame);
+              priorityLoad(effectiveScroll);
+            }
           } else {
             // Phase 2 - freeze on last frame
             if (currentFrame !== FRAME_COUNT - 1) {
