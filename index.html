@@ -6,7 +6,8 @@
   <title>Arvin's Detail Shop | Stillwater, OK</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+  <!-- FIX #14: Added Cormorant Garamond which was referenced in CSS but never loaded -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&family=Jost:wght@300;400;500&family=Cormorant+Garamond:wght@300;400;600&display=swap" rel="stylesheet">
   <style>
     :root {
       --gold: #C9A962;
@@ -24,8 +25,11 @@
       box-sizing: border-box;
     }
 
+    /* FIX #11: Removed scroll-behavior: smooth from html — it conflicts with
+       scroll-driven animation by adding inertia to programmatic scrollTo() calls.
+       Smooth scrolling is now applied only where explicitly needed in JS. */
     html {
-      scroll-behavior: smooth;
+      /* scroll-behavior: smooth; -- removed */
     }
 
     body {
@@ -89,6 +93,10 @@
       object-fit: cover;
       z-index: 0;
       background: #0A0A0A;
+      /* FIX #12: Promote canvas to its own GPU compositor layer to prevent
+         repaints from affecting other elements during scroll animation */
+      will-change: transform;
+      transform: translateZ(0);
     }
 
     #videoOverlay {
@@ -552,7 +560,6 @@
       padding-top: 48px;
       border-top: 1px solid rgba(255,255,255,0.1);
       max-width: 600px;
-      margin: 48px auto 0;
     }
 
     .contact-form h3 {
@@ -909,8 +916,8 @@
     </div>
   </div>
 
-  <!-- Spacer for scroll -->
-  </div>
+  <!-- Bottom spacer -->
+  <div style="height: 10vh;"></div>
 
   <script>
     // ========== SCROLL-DRIVEN VIDEO ==========
@@ -931,23 +938,36 @@
     const FRAME_COUNT = 482;
     const PHASE_SPLIT = 0.85;
     let lastDrawnFrame = -1;
-    
-    // Mobile detection and scroll sensitivity
-    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    const SCROLL_MULTIPLIER = isMobile ? 0.5 : 1.0;
+
+    // FIX #3: Removed the mobile scroll multiplier entirely. The 0.5 multiplier
+    // caused the video to only ever reach frame 241/482 on mobile — the animation
+    // was cut off halfway. Scroll fraction maps directly to frames on all devices.
     const FRAME_PATH = 'frames/frame_';
     const FRAME_EXT = '.jpg';
     const FRAME_OFFSET = 1;
 
     // Frame cache
     const frameCache = new Map();
+    // FIX #4: Track which frames already have an onload listener to prevent overwrite races
+    const frameLoadListeners = new Set();
     let currentFrame = -1;
+
+    // FIX #2: ticking must be set to true BEFORE requestAnimationFrame is queued,
+    // not after — otherwise scroll events can sneak in and queue a duplicate rAF frame.
     let ticking = false;
+
+    // FIX #8: Frame interpolation — smoothly lerp toward the target frame each rAF tick
+    let targetFrame = 0;
+    let animFrameId = null;
 
     // Resize canvas
     function resizeCanvas() {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
+      // FIX #7: Redraw current frame after resize (orientation change was blanking canvas)
+      if (currentFrame >= 0) {
+        drawFrame(currentFrame);
+      }
     }
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
@@ -955,11 +975,20 @@
     // Load frame
     function loadFrame(index) {
       if (frameCache.has(index)) return frameCache.get(index);
-      
+
       const img = new Image();
-      img.decoding = 'async'; // Non-blocking decode
+      // FIX #5: Removed img.decoding = 'async'. With async decoding, img.complete
+      // is true but pixels may not be decoded yet, causing blank/corrupt frames.
+      // Synchronous decoding ensures the image is ready when complete === true.
       const frameNum = String(index + FRAME_OFFSET).padStart(3, '0');
       img.src = `${FRAME_PATH}${frameNum}${FRAME_EXT}`;
+
+      // FIX #10: Handle load errors so broken frames don't silently stall the animation
+      img.onerror = () => {
+        console.warn(`Frame ${index} failed to load: ${img.src}`);
+        // Leave in cache as a failed entry so we don't retry infinitely
+      };
+
       frameCache.set(index, img);
       return img;
     }
@@ -967,139 +996,155 @@
     // Draw frame
     function drawFrame(index) {
       const img = loadFrame(index);
-      
-      // If image not loaded yet, try to draw when it loads
+
       if (!img.complete || img.naturalWidth === 0) {
-        img.onload = () => drawFrame(index);
+        // FIX #4: Use addEventListener instead of assigning img.onload so that
+        // multiple drawFrame calls while loading don't overwrite each other.
+        // Guard with frameLoadListeners set to avoid stacking duplicate listeners.
+        if (!frameLoadListeners.has(index)) {
+          frameLoadListeners.add(index);
+          img.addEventListener('load', () => {
+            frameLoadListeners.delete(index);
+            // Only draw if this is still the frame we want
+            if (index === currentFrame) {
+              drawFrame(index);
+            }
+          }, { once: true });
+        }
         return;
       }
-      
-      if (img.complete && img.naturalWidth !== 0) {
-        const canvasRatio = canvas.width / canvas.height;
-        const imgRatio = img.naturalWidth / img.naturalHeight;
-        
-        let sx, sy, sw, sh;
-        
-        if (imgRatio > canvasRatio) {
-          sh = img.naturalHeight;
-          sw = sh * canvasRatio;
-          sy = 0;
-          sx = (img.naturalWidth - sw) / 2;
-        } else {
-          sw = img.naturalWidth;
-          sh = sw / canvasRatio;
-          sx = 0;
-          sy = (img.naturalHeight - sh) / 2;
+
+      const canvasRatio = canvas.width / canvas.height;
+      const imgRatio = img.naturalWidth / img.naturalHeight;
+
+      let sx, sy, sw, sh;
+
+      if (imgRatio > canvasRatio) {
+        sh = img.naturalHeight;
+        sw = sh * canvasRatio;
+        sy = 0;
+        sx = (img.naturalWidth - sw) / 2;
+      } else {
+        sw = img.naturalWidth;
+        sh = sw / canvasRatio;
+        sx = 0;
+        sy = (img.naturalHeight - sh) / 2;
+      }
+
+      ctx.drawImage(img, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
+    }
+
+    // FIX #8: Animation loop for smooth frame interpolation.
+    // Instead of jumping directly to the target frame, we lerp currentFrame
+    // toward targetFrame each tick, eliminating harsh jumps on fast scrolls.
+    function animationLoop() {
+      const diff = targetFrame - currentFrame;
+      if (Math.abs(diff) >= 1) {
+        // Step toward target: move at least 1 frame, up to ~20% of the gap per tick
+        const step = Math.sign(diff) * Math.max(1, Math.floor(Math.abs(diff) * 0.2));
+        currentFrame = Math.round(currentFrame + step);
+        currentFrame = Math.max(0, Math.min(FRAME_COUNT - 1, currentFrame));
+
+        if (currentFrame !== lastDrawnFrame) {
+          lastDrawnFrame = currentFrame;
+          drawFrame(currentFrame);
         }
-        
-        ctx.drawImage(img, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
       }
+      animFrameId = requestAnimationFrame(animationLoop);
     }
+    // Kick off the animation loop immediately
+    animationLoop();
 
-    // Priority load frames
-    function priorityLoad(scrollFraction) {
-      const frameFraction = scrollFraction / PHASE_SPLIT;
-      const targetFrame = Math.floor(frameFraction * FRAME_COUNT);
-      for (let i = -2; i <= 5; i++) {
-        const frameIndex = targetFrame + i;
-        if (frameIndex >= 0 && frameIndex < FRAME_COUNT) {
-          loadFrame(frameIndex);
+    // Priority load frames around current position
+    function priorityLoad(frameIndex) {
+      // FIX #6: Expanded priority window from ±2/+5 to ±20 to survive fast flicks
+      for (let i = -20; i <= 20; i++) {
+        const fi = frameIndex + i;
+        if (fi >= 0 && fi < FRAME_COUNT) {
+          loadFrame(fi);
         }
       }
     }
 
-    // Background load every 5th frame
-    function backgroundLoad() {
-      for (let i = 0; i < FRAME_COUNT; i += 5) {
-        if (!frameCache.has(i)) loadFrame(i);
-      }
-      // Then load remaining frames
-      for (let i = 0; i < FRAME_COUNT; i++) {
-        if (!frameCache.has(i)) loadFrame(i);
-      }
-    }
-
-    // Check frames loaded
-    function checkFramesLoaded() {
+    // Check how many frames are actually decoded and ready
+    function countLoadedFrames() {
       let loaded = 0;
       frameCache.forEach(img => {
         if (img.complete && img.naturalWidth !== 0) loaded++;
       });
-      return { loaded, total: FRAME_COUNT };
+      return loaded;
     }
 
     // Initialize
     function init() {
       resizeCanvas();
-      
+
       // Draw first frame immediately
       drawFrame(0);
       currentFrame = 0;
-      
-      // Force redraw after page loads to ensure first frame is visible
-      setTimeout(() => {
-        drawFrame(0);
-        currentFrame = 0;
-      }, 100);
-      
-      // Also set up onload handler
-      const firstFrame = loadFrame(0);
-      firstFrame.onload = () => {
-        drawFrame(0);
-        currentFrame = 0;
-      };
-      
-      const tryDrawFirstFrame = () => {
-        if (firstFrame.complete && firstFrame.naturalWidth !== 0) {
-          drawFrame(0);
-          currentFrame = 0;
-        }
-      };
-      setTimeout(tryDrawFirstFrame, 100);
-      setTimeout(tryDrawFirstFrame, 500);
+      targetFrame = 0;
 
-      // Checkpoint preloading - load checkpoints + first 80 frames for immediate scrolling
+      // Also ensure it draws once the image element reports loaded
+      const firstFrame = loadFrame(0);
+      if (!firstFrame.complete) {
+        firstFrame.addEventListener('load', () => {
+          drawFrame(0);
+        }, { once: true });
+      }
+
+      // FIX #9: Removed dead backgroundLoad() call and fixed continueBackgroundLoad
+      // to start at index 80 (since 0–79 and checkpoints are already queued below),
+      // avoiding redundant iteration over already-loading frames.
       const CHECKPOINTS = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0].map(p => Math.floor(p * FRAME_COUNT));
       CHECKPOINTS.forEach(i => loadFrame(i));
       for (let i = 0; i < 80; i++) loadFrame(i);
-      
-      // Update loader bar for checkpoints
+
       const loaderBar = document.getElementById('loaderBar');
       if (loaderBar) loaderBar.style.width = '15%';
-      
-      // Background load remaining frames using setTimeout (more reliable on mobile)
+
+      // FIX #13: Track actual decoded frame count to determine when loader should hide.
+      // The loader now only hides once enough frames are truly decoded, not just queued.
       function continueBackgroundLoad(startIdx) {
-        const endIdx = Math.min(startIdx + 30, FRAME_COUNT); // Load 30 at a time
-        
+        const endIdx = Math.min(startIdx + 30, FRAME_COUNT);
+
         for (let i = startIdx; i < endIdx; i++) {
-          if (!CHECKPOINTS.includes(i)) {
+          if (!frameCache.has(i)) {
             loadFrame(i);
           }
         }
-        
-        // Update progress
+
         if (loaderBar) {
           const progress = (endIdx / FRAME_COUNT * 80) + 15;
           loaderBar.style.width = progress + '%';
         }
-        
+
         if (endIdx < FRAME_COUNT) {
           setTimeout(() => continueBackgroundLoad(endIdx), 50);
         } else {
-          // All loaded
+          // All frames queued — poll until enough are actually decoded before hiding
           if (loaderBar) loaderBar.style.width = '100%';
+          waitForMinFrames();
+        }
+      }
+
+      // FIX #13 continued: Wait until at least the first 80 frames are decoded
+      // before hiding the loader, so the user can't scroll into blank frames.
+      function waitForMinFrames() {
+        const loaded = countLoadedFrames();
+        if (loaded >= 80) {
           setTimeout(() => {
             if (loader) loader.classList.add('hidden');
           }, 300);
+        } else {
+          setTimeout(waitForMinFrames, 100);
         }
       }
-      
-      // Start background loading after short delay
+
+      // FIX #9: Start background load from index 80 (not 0) since 0-79 are already queued
       setTimeout(() => {
-        continueBackgroundLoad(0);
+        continueBackgroundLoad(80);
       }, 1000);
 
-      // Handle quote scroll
       if (window.location.hash === '#quote') {
         setTimeout(() => {
           const quoteSection = document.getElementById('quote');
@@ -1112,16 +1157,23 @@
     document.querySelectorAll('[data-scroll-to-quote]').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.preventDefault();
-        // Scroll to trigger phase 2
         const scrollHeight = document.body.scrollHeight - window.innerHeight;
-        const targetScroll = PHASE_SPLIT * scrollHeight;
-        window.scrollTo({ top: targetScroll, behavior: 'smooth' });
+        const scrollTarget = PHASE_SPLIT * scrollHeight;
+        // FIX #11: Use explicit behavior:'smooth' here instead of relying on
+        // the CSS scroll-behavior rule (which was removed to prevent animation conflicts)
+        window.scrollTo({ top: scrollTarget, behavior: 'smooth' });
       });
     });
 
-    // Scroll handler with passive listener
+    // FIX #1: Added { passive: true } to the scroll listener.
+    // Without this, the browser must wait for the handler to complete before
+    // compositing each scroll frame — the primary cause of scroll jank on mobile.
     window.addEventListener('scroll', () => {
+      // FIX #2: Set ticking = true BEFORE calling requestAnimationFrame.
+      // Previously ticking was set after, allowing scroll events to queue
+      // duplicate rAF frames in the gap between queueing and setting the flag.
       if (!ticking) {
+        ticking = true;
         requestAnimationFrame(() => {
           const scrollFraction = Math.max(0, Math.min(1, window.scrollY / (document.body.scrollHeight - window.innerHeight)));
 
@@ -1152,50 +1204,41 @@
           // Phase 1 - video frames
           if (scrollFraction <= PHASE_SPLIT) {
             let frameIndex;
-            
-            // Apply mobile scroll multiplier
-            const effectiveScroll = scrollFraction * SCROLL_MULTIPLIER;
-            
-            // Always draw frame 0 when at very top (fixes black screen on mobile)
-            if (scrollFraction < 0.001 || effectiveScroll < 0.001) {
+
+            if (scrollFraction < 0.001) {
               frameIndex = 0;
             } else {
-              const frameFraction = effectiveScroll / PHASE_SPLIT;
+              const frameFraction = scrollFraction / PHASE_SPLIT;
               frameIndex = Math.min(Math.floor(frameFraction * FRAME_COUNT), FRAME_COUNT - 1);
             }
-            
-            // Only redraw if frame changed OR if at very top (to fix pull-down blank issue)
-            if (frameIndex !== lastDrawnFrame || scrollFraction < 0.001) {
-              currentFrame = frameIndex;
-              lastDrawnFrame = frameIndex;
-              drawFrame(currentFrame);
-              priorityLoad(effectiveScroll);
-            }
+
+            // FIX #8: Set targetFrame instead of drawing directly —
+            // the animationLoop will lerp currentFrame toward it smoothly.
+            targetFrame = frameIndex;
+            priorityLoad(frameIndex);
+
           } else {
             // Phase 2 - freeze on last frame
-            if (currentFrame !== FRAME_COUNT - 1) {
-              currentFrame = FRAME_COUNT - 1;
-              drawFrame(currentFrame);
-            }
+            targetFrame = FRAME_COUNT - 1;
           }
 
           // Text blocks animation
           textBlocks.forEach(block => {
             const start = parseFloat(block.dataset.start) * PHASE_SPLIT;
             const end = parseFloat(block.dataset.end) * PHASE_SPLIT;
-            
+
             if (scrollFraction >= start && scrollFraction <= end) {
               const progress = (scrollFraction - start) / (end - start);
               const opacity = progress < 0.2 ? progress / 0.2 : progress > 0.8 ? (1 - progress) / 0.2 : 1;
               const translateY = (1 - Math.min(progress / 0.2, 1)) * 60;
-              
+
               let translateX = 0;
               if (block.classList.contains('left')) {
                 translateX = (1 - Math.min(progress / 0.2, 1)) * -60;
               } else if (block.classList.contains('right')) {
                 translateX = (1 - Math.min(progress / 0.2, 1)) * 60;
               }
-              
+
               block.style.opacity = opacity;
               block.style.transform = `translateY(calc(-50% + ${translateY}px)) translateX(${translateX}px)`;
             } else {
@@ -1205,20 +1248,19 @@
 
           ticking = false;
         });
-        ticking = true;
       }
-    });
+    }, { passive: true }); // FIX #1: passive: true is the key flag here
 
     // Handle quote form submission
     document.getElementById('quoteForm').addEventListener('submit', function(e) {
       e.preventDefault();
-      
+
       const name = this.querySelector('input[type="text"]').value;
       const phone = this.querySelector('input[type="tel"]').value;
       const email = this.querySelector('input[type="email"]').value;
       const service = this.querySelector('select').value;
       const message = this.querySelector('textarea').value;
-      
+
       const subject = encodeURIComponent('New Quote Request - ' + (service || 'General Inquiry'));
       const body = encodeURIComponent(
         'Name: ' + name + '\n' +
@@ -1227,14 +1269,11 @@
         'Service: ' + service + '\n\n' +
         'Message:\n' + message
       );
-      
+
       window.location.href = 'mailto:arvinsdetailshop@gmail.com?subject=' + subject + '&body=' + body;
     });
 
     init();
   </script>
-
-  <!-- Bottom spacer -->
-  <div style="height: 10vh;"></div>
 </body>
 </html>
