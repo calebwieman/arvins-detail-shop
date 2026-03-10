@@ -1034,6 +1034,12 @@
       drawFrame(0);
       currentFrame = 0;
       
+      // Force redraw after page loads to ensure first frame is visible
+      setTimeout(() => {
+        drawFrame(0);
+        currentFrame = 0;
+      }, 100);
+      
       // Also set up onload handler
       const firstFrame = loadFrame(0);
       firstFrame.onload = () => {
@@ -1156,12 +1162,10 @@
               frameIndex = Math.min(Math.floor(frameFraction * FRAME_COUNT), FRAME_COUNT - 1);
             }
             
-            // Always call drawFrame to ensure frame is rendered
-            if (frameIndex !== currentFrame || scrollFraction < 0.02) {
-              currentFrame = frameIndex;
-              drawFrame(currentFrame);
-              priorityLoad(effectiveScroll);
-            }
+            // Always call drawFrame in Phase 1 to ensure frame is rendered
+            currentFrame = frameIndex;
+            drawFrame(currentFrame);
+            priorityLoad(effectiveScroll);
           } else {
             // Phase 2 - freeze on last frame
             if (currentFrame !== FRAME_COUNT - 1) {
