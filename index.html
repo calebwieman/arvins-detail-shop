@@ -965,6 +965,13 @@
     // Draw frame
     function drawFrame(index) {
       const img = loadFrame(index);
+      
+      // If image not loaded yet, try to draw when it loads
+      if (!img.complete || img.naturalWidth === 0) {
+        img.onload = () => drawFrame(index);
+        return;
+      }
+      
       if (img.complete && img.naturalWidth !== 0) {
         const canvasRatio = canvas.width / canvas.height;
         const imgRatio = img.naturalWidth / img.naturalHeight;
