@@ -1048,11 +1048,11 @@
       
       // Update loader bar for checkpoints
       const loaderBar = document.getElementById('loaderBar');
-      if (loaderBar) loaderBar.style.width = '10%';
+      if (loaderBar) loaderBar.style.width = '15%';
       
-      // Background load remaining frames using requestIdleCallback
+      // Background load remaining frames using setTimeout (more reliable on mobile)
       function continueBackgroundLoad(startIdx) {
-        const endIdx = Math.min(startIdx + 20, FRAME_COUNT); // Load 20 at a time
+        const endIdx = Math.min(startIdx + 30, FRAME_COUNT); // Load 30 at a time
         
         for (let i = startIdx; i < endIdx; i++) {
           if (!CHECKPOINTS.includes(i)) {
@@ -1062,12 +1062,12 @@
         
         // Update progress
         if (loaderBar) {
-          const progress = (endIdx / FRAME_COUNT * 90) + 10;
+          const progress = (endIdx / FRAME_COUNT * 80) + 15;
           loaderBar.style.width = progress + '%';
         }
         
         if (endIdx < FRAME_COUNT) {
-          requestIdleCallback(() => continueBackgroundLoad(endIdx), { timeout: 2000 });
+          setTimeout(() => continueBackgroundLoad(endIdx), 50);
         } else {
           // All loaded
           if (loaderBar) loaderBar.style.width = '100%';
@@ -1079,8 +1079,8 @@
       
       // Start background loading after short delay
       setTimeout(() => {
-        requestIdleCallback(() => continueBackgroundLoad(0), { timeout: 1000 });
-      }, 500);
+        continueBackgroundLoad(0);
+      }, 1000);
 
       // Handle quote scroll
       if (window.location.hash === '#quote') {
