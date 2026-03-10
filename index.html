@@ -1148,11 +1148,6 @@
             videoOverlay.style.opacity = '1';
           }
 
-          // Always ensure overlay is visible in Phase 1
-          if (scrollFraction <= PHASE_SPLIT && videoOverlay) {
-            videoOverlay.style.opacity = '1';
-          }
-
           // Phase 1 - video frames
           if (scrollFraction <= PHASE_SPLIT) {
             let frameIndex;
