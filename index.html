@@ -432,7 +432,7 @@
     /* ========== PHASE 2 - INFO PANEL ========== */
     #info-panel {
       position: absolute;
-      top: 1100vh;
+      top: var(--phase2-start, 1100vh);
       left: 0;
       width: 100%;
       min-height: 200vh;
@@ -944,9 +944,15 @@
     const PHASE_SPLIT = 0.85;
     let lastDrawnFrame = -1;
 
-    // FIX #3: Removed the mobile scroll multiplier entirely. The 0.5 multiplier
-    // caused the video to only ever reach frame 241/482 on mobile — the animation
-    // was cut off halfway. Scroll fraction maps directly to frames on all devices.
+    // Mobile detection for scroll sensitivity
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const PHASE1_SCROLL_MULT = isMobile ? 0.5 : 1.0; // Phase 1 (video) sensitivity
+    const PHASE2_SCROLL_MULT = isMobile ? 0.7 : 1.0; // Phase 2 sensitivity (30% less on mobile)
+    
+    // Set Phase 2 start position - 30% less sensitive on mobile = starts lower
+    if (isMobile) {
+      document.documentElement.style.setProperty('--phase2-start', '1430vh');
+    }
     const FRAME_PATH = 'frames/frame_';
     const FRAME_EXT = '.jpg';
     const FRAME_OFFSET = 1;
@@ -1207,13 +1213,16 @@
           }
 
           // Phase 1 - video frames
+          // Apply mobile sensitivity multiplier for video
+          const phase1Scroll = scrollFraction * PHASE1_SCROLL_MULT;
+          
           if (scrollFraction <= PHASE_SPLIT) {
             let frameIndex;
 
-            if (scrollFraction < 0.001) {
+            if (phase1Scroll < 0.001) {
               frameIndex = 0;
             } else {
-              const frameFraction = scrollFraction / PHASE_SPLIT;
+              const frameFraction = phase1Scroll / PHASE_SPLIT;
               frameIndex = Math.min(Math.floor(frameFraction * FRAME_COUNT), FRAME_COUNT - 1);
             }
 
