@@ -927,6 +927,10 @@
     // Frame configuration
     const FRAME_COUNT = 482;
     const PHASE_SPLIT = 0.85;
+    
+    // Mobile detection and scroll sensitivity
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const SCROLL_MULTIPLIER = isMobile ? 0.3 : 1.0;
     const FRAME_PATH = 'frames/frame_';
     const FRAME_EXT = '.jpg';
     const FRAME_OFFSET = 1;
@@ -1132,11 +1136,14 @@
           if (scrollFraction <= PHASE_SPLIT) {
             let frameIndex;
             
+            // Apply mobile scroll multiplier
+            const effectiveScroll = scrollFraction * SCROLL_MULTIPLIER;
+            
             // Always draw frame 0 when at very top (fixes black screen on mobile)
-            if (scrollFraction < 0.02) {
+            if (effectiveScroll < 0.02) {
               frameIndex = 0;
             } else {
-              const frameFraction = scrollFraction / PHASE_SPLIT;
+              const frameFraction = effectiveScroll / PHASE_SPLIT;
               frameIndex = Math.min(Math.floor(frameFraction * FRAME_COUNT), FRAME_COUNT - 1);
             }
             
@@ -1144,7 +1151,7 @@
             if (frameIndex !== currentFrame || scrollFraction < 0.02) {
               currentFrame = frameIndex;
               drawFrame(currentFrame);
-              priorityLoad(scrollFraction);
+              priorityLoad(effectiveScroll);
             }
           } else {
             // Phase 2 - freeze on last frame
