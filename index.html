@@ -946,12 +946,13 @@
 
     // Mobile detection for scroll sensitivity
     const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    const PHASE1_SCROLL_MULT = isMobile ? 0.5 : 1.0; // Phase 1 (video) sensitivity
+    // On mobile, make Phase 1 longer (0.95 instead of 0.85) so video plays fully but feels less sensitive
+    const PHASE_SPLIT_MOBILE = isMobile ? 0.95 : 0.85;
     const PHASE2_SCROLL_MULT = isMobile ? 0.7 : 1.0; // Phase 2 sensitivity (30% less on mobile)
     
-    // Set Phase 2 start position - 30% less sensitive on mobile = starts lower
+    // Set Phase 2 start position - on mobile it starts at 95vh to match longer Phase 1
     if (isMobile) {
-      document.documentElement.style.setProperty('--phase2-start', '1430vh');
+      document.documentElement.style.setProperty('--phase2-start', '1350vh');
     }
     const FRAME_PATH = 'frames/frame_';
     const FRAME_EXT = '.jpg';
@@ -1169,7 +1170,7 @@
       btn.addEventListener('click', (e) => {
         e.preventDefault();
         const scrollHeight = document.body.scrollHeight - window.innerHeight;
-        const scrollTarget = PHASE_SPLIT * scrollHeight;
+        const scrollTarget = effectivePhaseSplit * scrollHeight;
         // FIX #11: Use explicit behavior:'smooth' here instead of relying on
         // the CSS scroll-behavior rule (which was removed to prevent animation conflicts)
         window.scrollTo({ top: scrollTarget, behavior: 'smooth' });
@@ -1213,16 +1214,16 @@
           }
 
           // Phase 1 - video frames
-          // Apply mobile sensitivity multiplier for video
-          const phase1Scroll = scrollFraction * PHASE1_SCROLL_MULT;
+          // On mobile, use longer Phase 1 so video plays fully but feels less sensitive
+          const effectivePhaseSplit = isMobile ? PHASE_SPLIT_MOBILE : 0.85;
           
-          if (scrollFraction <= PHASE_SPLIT) {
+          if (scrollFraction <= effectivePhaseSplit) {
             let frameIndex;
 
-            if (phase1Scroll < 0.001) {
+            if (scrollFraction < 0.001) {
               frameIndex = 0;
             } else {
-              const frameFraction = phase1Scroll / PHASE_SPLIT;
+              const frameFraction = scrollFraction / effectivePhaseSplit;
               frameIndex = Math.min(Math.floor(frameFraction * FRAME_COUNT), FRAME_COUNT - 1);
             }
 
@@ -1238,8 +1239,8 @@
 
           // Text blocks animation
           textBlocks.forEach(block => {
-            const start = parseFloat(block.dataset.start) * PHASE_SPLIT;
-            const end = parseFloat(block.dataset.end) * PHASE_SPLIT;
+            const start = parseFloat(block.dataset.start) * effectivePhaseSplit;
+            const end = parseFloat(block.dataset.end) * effectivePhaseSplit;
 
             if (scrollFraction >= start && scrollFraction <= end) {
               const progress = (scrollFraction - start) / (end - start);
