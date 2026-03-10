@@ -1121,7 +1121,7 @@
     window.addEventListener('scroll', () => {
       if (!ticking) {
         requestAnimationFrame(() => {
-          const scrollFraction = window.scrollY / (document.body.scrollHeight - window.innerHeight);
+          const scrollFraction = Math.max(0, Math.min(1, window.scrollY / (document.body.scrollHeight - window.innerHeight)));
 
           // Smart header
           const currentScrollY = window.scrollY;
