@@ -1160,7 +1160,7 @@
             const effectiveScroll = scrollFraction * SCROLL_MULTIPLIER;
             
             // Always draw frame 0 when at very top (fixes black screen on mobile)
-            if (effectiveScroll < 0.02) {
+            if (scrollFraction < 0.001 || effectiveScroll < 0.001) {
               frameIndex = 0;
             } else {
               const frameFraction = effectiveScroll / PHASE_SPLIT;
@@ -1168,7 +1168,7 @@
             }
             
             // Only redraw if frame changed OR if at very top (to fix pull-down blank issue)
-            if (frameIndex !== currentFrame || scrollFraction < 0.01) {
+            if (frameIndex !== currentFrame || scrollFraction < 0.001) {
               currentFrame = frameIndex;
               drawFrame(currentFrame);
               priorityLoad(effectiveScroll);
